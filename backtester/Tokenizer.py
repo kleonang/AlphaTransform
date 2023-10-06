@@ -1,4 +1,4 @@
-from StrategyOperator import StrategyOperator
+import StrategyOperator
 import SimulationData
 
 # Tokenizes a string into a list of tokens (functions, variables, operators, etc.)

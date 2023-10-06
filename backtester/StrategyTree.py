@@ -1,16 +1,14 @@
 import pandas as pd
 import SimulationData
-from StrategyOperator import StrategyOperator
+from Operator import *
+import StrategyOperator
 from Tokenizer import Tokenizer
 
 # Represents a node in the strategy tree consisting of operators and data
-class StrategyTree():
+class StrategyTree:
     # Default constructor
-    def __init__(self, operator, is_constant: bool, is_data: bool, name: str) -> None:
-        self.operator = operator
-        self.is_constant = is_constant
-        self.is_data = is_data
-        self.name = name
+    def __init__(self, expression: Expression) -> None:
+        self.expression = expression
         self.children: ['StrategyTree'] = []
 
     # Factory method for operator nodes (includes constants)
@@ -30,14 +28,14 @@ class StrategyTree():
     def from_data(cls, data: str, sim_start: str, sim_end: str, delay: int) -> 'StrategyTree':
         data_class = getattr(SimulationData, data.capitalize())
         operator = data_class(sim_start, sim_end, delay).get_data()
-        is_constant = False
-        is_data = True
-        return cls(operator, is_constant, is_data, data)
+        return cls(operator, data)
     
     def evaluate(self) -> pd.DataFrame:
         # Evaluates the strategy tree and returns the resulting data
-        if self.is_data or self.is_constant:
-            return self.operator
+        if isinstance(self.expression, Feature):
+            return self.expression._feature
+        elif isinstance(self.expression, Constant):
+            return self.expression._value
         # Evaluate children first
         # s = "("
         # s += self.name + ": "
@@ -46,9 +44,10 @@ class StrategyTree():
         # s = s[:-2]
         # s += ")"
         # print(s)
-        evaluated_children = [child.evaluate() for child in self.children]
-        # Evaluate operator
-        return self.operator(*evaluated_children)
+        elif isinstance(self.expression, Operator):
+            evaluated_children = [child.evaluate() for child in self.children]
+            # Evaluate operator
+            return self.expression.apply(*evaluated_children)
         
     def add_child(self, child: 'StrategyTree') -> None:
         # Adds a child to the strategy tree

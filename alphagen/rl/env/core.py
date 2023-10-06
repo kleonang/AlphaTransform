@@ -1,34 +1,31 @@
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
+from backtester.StrategySimulator import StrategySimulator
 import gymnasium as gym
 import math
+import torch
 
-from alphagen.config import MAX_EXPR_LENGTH
+from config import MAX_EXPR_LENGTH, SIM_START, SIM_END, IS_START, OS_START, DELAY
 from alphagen.data.tokens import *
-from alphagen.data.expression import *
+from backtester.Operator import *
 from alphagen.data.tree import ExpressionBuilder
-from alphagen.models.alpha_pool import AlphaPoolBase, AlphaPool
 from alphagen.utils import reseed_everything
 
-
 class AlphaEnvCore(gym.Env):
-    pool: AlphaPoolBase
     _tokens: List[Token]
     _builder: ExpressionBuilder
     _print_expr: bool
 
     def __init__(self,
-                 pool: AlphaPoolBase,
-                 device: torch.device = torch.device('cuda:0'),
+                 device: torch.device = torch.device('cpu'),
                  print_expr: bool = False
                  ):
         super().__init__()
 
-        self.pool = pool
         self._print_expr = print_expr
         self._device = device
 
         self.eval_cnt = 0
-
+        self.strategy_simulator = StrategySimulator(SIM_START, SIM_END, IS_START, OS_START, DELAY)
         self.render_mode = None
 
     def reset(
@@ -67,7 +64,7 @@ class AlphaEnvCore(gym.Env):
         if self._print_expr:
             print(expr)
         try:
-            ret = self.pool.try_new_expr(expr)
+            ret = self.strategy_simulator.loss_from_expression(expr, loss='IC')
             self.eval_cnt += 1
             return ret
         except OutOfDataRangeError:

@@ -1,6 +1,6 @@
 from enum import IntEnum
-from typing import Type
 from backtester.SimulationData import SimulationData
+from backtester.Operator import Operator
 
 class SequenceIndicatorType(IntEnum):
     BEG = 0
@@ -30,11 +30,11 @@ class FeatureToken(Token):
     def __init__(self, data: SimulationData) -> None:
         self.data = data
 
-    def __str__(self): return '$' + self.data.__name__.lower()
+    def __str__(self): return '$' + self.data.__name__().lower()
 
 
 class OperatorToken(Token):
-    def __init__(self, operator) -> None:
+    def __init__(self, operator: Operator) -> None:
         self.operator = operator
 
     def __str__(self): return self.operator.__name__

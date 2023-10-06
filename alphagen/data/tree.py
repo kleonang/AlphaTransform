@@ -1,12 +1,12 @@
-from alphagen.data.expression import *
+from backtester.Operator import *
 from alphagen.data.tokens import *
-
+from backtester.SimulationData import *
+from backtester.StrategyOperator import *
+from typing import List
 
 class ExpressionBuilder:
-    stack: List[Expression]
-
     def __init__(self):
-        self.stack = []
+        self.stack: List[Expression] = []
 
     def get_tree(self) -> Expression:
         if len(self.stack) == 1:
@@ -28,12 +28,12 @@ class ExpressionBuilder:
         elif isinstance(token, DeltaTimeToken):
             self.stack.append(DeltaTime(token.delta_time))
         elif isinstance(token, FeatureToken):
-            self.stack.append(Feature(token.feature))
+            self.stack.append(Feature(token.data))
         else:
             assert False
 
     def is_valid(self) -> bool:
-        return len(self.stack) == 1 and self.stack[0].is_featured
+        return len(self.stack) == 1 and self.stack[0].is_feature
 
     def validate(self, token: Token) -> bool:
         if isinstance(token, OperatorToken):
@@ -52,10 +52,10 @@ class ExpressionBuilder:
             return False
 
         if issubclass(op, UnaryOperator):
-            if not self.stack[-1].is_featured:
+            if not self.stack[-1].is_feature:
                 return False
         elif issubclass(op, BinaryOperator):
-            if not self.stack[-1].is_featured and not self.stack[-2].is_featured:
+            if not self.stack[-1].is_feature and not self.stack[-2].is_feature:
                 return False
             if (isinstance(self.stack[-1], DeltaTime) or
                     isinstance(self.stack[-2], DeltaTime)):
@@ -63,25 +63,28 @@ class ExpressionBuilder:
         elif issubclass(op, RollingOperator):
             if not isinstance(self.stack[-1], DeltaTime):
                 return False
-            if not self.stack[-2].is_featured:
+            if not self.stack[-2].is_feature:
                 return False
         elif issubclass(op, PairRollingOperator):
             if not isinstance(self.stack[-1], DeltaTime):
                 return False
-            if not self.stack[-2].is_featured or not self.stack[-3].is_featured:
+            if not self.stack[-2].is_feature or not self.stack[-3].is_feature:
                 return False
         else:
             assert False
         return True
 
     def validate_dt(self) -> bool:
-        return len(self.stack) > 0 and self.stack[-1].is_featured
+        return len(self.stack) > 0 and self.stack[-1].is_feature
 
     def validate_const(self) -> bool:
-        return len(self.stack) == 0 or self.stack[-1].is_featured
+        return len(self.stack) == 0 or self.stack[-1].is_feature
 
     def validate_feature(self) -> bool:
         return not (len(self.stack) >= 1 and isinstance(self.stack[-1], DeltaTime))
+    
+    def evaluate(self) -> pd.DataFrame:
+        return self.get_tree().evaluate()
 
 
 class InvalidExpressionException(ValueError):
@@ -89,14 +92,18 @@ class InvalidExpressionException(ValueError):
 
 
 if __name__ == '__main__':
+    # Set simulation start and end dates
+    sim_start = '2011-01-01'
+    sim_end = '2017-12-07'
+
     tokens = [
-        FeatureToken(FeatureType.LOW),
+        FeatureToken(Low(sim_start, sim_end)),
         OperatorToken(Abs),
-        DeltaTimeToken(-10),
-        OperatorToken(Ref),
-        FeatureToken(FeatureType.HIGH),
-        FeatureToken(FeatureType.CLOSE),
-        OperatorToken(Div),
+        DeltaTimeToken(10),
+        OperatorToken(TsDelta),
+        FeatureToken(High(sim_start, sim_end)),
+        FeatureToken(Close(sim_start, sim_end)),
+        OperatorToken(Divide),
         OperatorToken(Add),
     ]
 
@@ -105,4 +112,4 @@ if __name__ == '__main__':
         builder.add_token(token)
 
     print(f'res: {str(builder.get_tree())}')
-    print(f'ref: Add(Ref(Abs($low),-10),Div($high,$close))')
+    print(f'ref: Add(TsDelta(Abs($low),10),Divide($high,$close))')

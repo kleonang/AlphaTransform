@@ -2,14 +2,13 @@ from typing import Tuple
 import gymnasium as gym
 import numpy as np
 
-from alphagen.config import *
+from config import *
 from alphagen.data.tokens import *
-from alphagen.models.alpha_pool import AlphaPoolBase, AlphaPool
 from alphagen.rl.env.core import AlphaEnvCore
 
 SIZE_NULL = 1
 SIZE_OP = len(OPERATORS)
-SIZE_FEATURE = len(FeatureType)
+SIZE_FEATURE = len(FEATURES)
 SIZE_DELTA_TIME = len(DELTA_TIMES)
 SIZE_CONSTANT = len(CONSTANTS)
 SIZE_SEP = 1
@@ -31,7 +30,7 @@ def action2token(action_raw: int) -> Token:
     elif action < OFFSET_FEATURE:
         return OperatorToken(OPERATORS[action - OFFSET_OP])
     elif action < OFFSET_DELTA_TIME:
-        return FeatureToken(FeatureType(action - OFFSET_FEATURE))
+        return FeatureToken(FEATURES[action - OFFSET_FEATURE])
     elif action < OFFSET_CONSTANT:
         return DeltaTimeToken(DELTA_TIMES[action - OFFSET_DELTA_TIME])
     elif action < OFFSET_SEP:
@@ -93,5 +92,5 @@ class AlphaEnvWrapper(gym.Wrapper):
         return res
 
 
-def AlphaEnv(pool: AlphaPoolBase, **kwargs):
-    return AlphaEnvWrapper(AlphaEnvCore(pool=pool, **kwargs))
+def AlphaEnv(**kwargs):
+    return AlphaEnvWrapper(AlphaEnvCore(**kwargs))

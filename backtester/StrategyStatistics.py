@@ -1,16 +1,21 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from SimulationData import Returns
-from StrategyOperator import StrategyOperator
+from backtester.SimulationData import Returns
+from backtester.StrategyOperator import Neutralize
+from alphagen.data.tokens import FeatureToken, OperatorToken
+from alphagen.data.tree import ExpressionBuilder
 
 class StrategyStatistics:
     # Class that provides methods for calculating quant backtesting statistics
     def __init__(self, returns_series: pd.Series):
         self.returns_series = returns_series
-        self.neutralized_returns = Returns(returns_series.index[0], returns_series.index[-1], delay=0).get_data()
-        self.neutralized_returns = StrategyOperator.neutralize(self.neutralized_returns)
-    
+        tokens = [FeatureToken(Returns(returns_series.index[0], returns_series.index[-1], delay=0)), OperatorToken(Neutralize)]
+        builder = ExpressionBuilder()
+        for token in tokens:
+            builder.add_token(token)
+        self.neutralized_returns = builder.evaluate()
+
     def sharpe(self):
         # Calculates the sharpe ratio for strategy
         return self.returns_series.mean() / self.returns_series.std() * np.sqrt(252)

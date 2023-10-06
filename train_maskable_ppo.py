@@ -1,19 +1,17 @@
-import json
 import os
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 from datetime import datetime
 import fire
+import torch
 
 import numpy as np
 from sb3_contrib.ppo_mask import MaskablePPO
 from stable_baselines3.common.callbacks import BaseCallback
 
-from alphagen.data.expression import *
-from alphagen.models.alpha_pool import AlphaPool, AlphaPoolBase
-from rl.env.wrapper import AlphaEnv
-from rl.policy import LSTMSharedNet
+from alphagen.rl.env.wrapper import AlphaEnv
+from alphagen.rl.policy import LSTMSharedNet
 from alphagen.utils.random import reseed_everything
-from rl.env.core import AlphaEnvCore
+from alphagen.rl.env.core import AlphaEnvCore
 from backtester.StrategySimulator import StrategySimulator
 
 
@@ -82,9 +80,9 @@ class CustomCallback(BaseCallback):
     # def pool(self) -> AlphaPoolBase:
     #     return self.env_core.pool
 
-    # @property
-    # def env_core(self) -> AlphaEnvCore:
-    #     return self.training_env.envs[0].unwrapped  # type: ignore
+    @property
+    def env_core(self) -> AlphaEnvCore:
+        return self.training_env.envs[0].unwrapped  # type: ignore
 
 
 def main(
@@ -148,9 +146,8 @@ def main(
 
 def fire_helper(
     seed: Union[int, Tuple[int]],
-    code: str,
-    pool: int,
-    step: int = None
+    instruments: str,
+    steps: int = None
 ):
     if isinstance(seed, int):
         seed = (seed, )
@@ -162,9 +159,8 @@ def fire_helper(
     }
     for _seed in seed:
         main(_seed,
-             code,
-             pool,
-             default_steps[int(pool)] if step is None else int(step)
+             instruments,
+             default_steps[10] if steps is None else int(steps)
              )
 
 

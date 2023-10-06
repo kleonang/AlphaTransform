@@ -2,10 +2,8 @@ import gymnasium as gym
 import math
 import torch.nn.functional as F
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
-from torch import nn
-
-from alphagen.data.expression import *
-
+import torch
+from torch import nn, Tensor
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model: int, max_len: int = 5000):

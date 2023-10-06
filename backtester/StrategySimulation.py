@@ -1,5 +1,5 @@
 import pandas as pd
-from StrategyStatistics import StrategyStatistics
+from backtester.StrategyStatistics import StrategyStatistics
 
 class StrategySimulation:
     def __init__(self, strategy_returns: pd.Series, sim_start: str, sim_end: str, is_start: str, os_start: str):
