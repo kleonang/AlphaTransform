@@ -87,6 +87,8 @@ class StrategySimulator:
         strategy_returns = self.simulate_strategy_returns(strategy_weights)
         strategy_simulation = StrategySimulation(strategy_returns, self.sim_start, self.sim_end, self.is_start, self.os_start)
         # Return loss
+        if not isinstance(strategy_weights, pd.DataFrame):
+            return -1
         if loss == "IC":
             return strategy_simulation.get_ic('is', strategy_weights)
         elif loss == "RIC":

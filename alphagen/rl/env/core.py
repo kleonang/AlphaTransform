@@ -7,6 +7,7 @@ import torch
 from config import MAX_EXPR_LENGTH, SIM_START, SIM_END, IS_START, OS_START, DELAY
 from alphagen.data.tokens import *
 from backtester.Operator import *
+from backtester.StrategyOperator import Neutralize
 from alphagen.data.tree import ExpressionBuilder
 from alphagen.utils import reseed_everything
 
@@ -42,6 +43,10 @@ class AlphaEnvCore(gym.Env):
     def step(self, action: Token) -> Tuple[List[Token], float, bool, bool, dict]:
         if (isinstance(action, SequenceIndicatorToken) and
                 action.indicator == SequenceIndicatorType.SEP):
+            # Append "Neutralize" operator to end of all expressions for long-short neutrality
+            neutralize = OperatorToken(Neutralize)
+            self._tokens.append(neutralize)
+            self._builder.add_token(neutralize)
             reward = self._evaluate()
             done = True
         elif len(self._tokens) < MAX_EXPR_LENGTH:
@@ -51,10 +56,17 @@ class AlphaEnvCore(gym.Env):
             reward = 0.0
         else:
             done = True
-            reward = self._evaluate() if self._builder.is_valid() else -1.
+            if self._builder.is_valid():
+                # Append "Neutralize" operator to end of all expressions for long-short neutrality
+                neutralize = OperatorToken(Neutralize)
+                self._tokens.append(neutralize)
+                self._builder.add_token(neutralize)
+                reward = self._evaluate()
+            else:
+                reward = -1.    
 
         if math.isnan(reward):
-            reward = 0.
+            reward = -1.
 
         truncated = False  # Fk gymnasium
         return self._tokens, reward, done, truncated, self._valid_action_types()
@@ -65,6 +77,10 @@ class AlphaEnvCore(gym.Env):
             print(expr)
         try:
             ret = self.strategy_simulator.loss_from_expression(expr, loss='IC')
+            if math.isnan(ret):
+                print("Casting nan to -1")
+                ret = -1
+            print("IC:", ret)
             self.eval_cnt += 1
             return ret
         except OutOfDataRangeError:

@@ -42,11 +42,11 @@ def action2token(action_raw: int) -> Token:
 
 
 class AlphaEnvWrapper(gym.Wrapper):
-    state: np.ndarray
-    env: AlphaEnvCore
-    action_space: gym.spaces.Discrete
-    observation_space: gym.spaces.Box
-    counter: int
+    # state: np.ndarray
+    # env: AlphaEnvCore
+    # action_space: gym.spaces.Discrete
+    # observation_space: gym.spaces.Box
+    # counter: int
 
     def __init__(self, env: AlphaEnvCore):
         super().__init__(env)

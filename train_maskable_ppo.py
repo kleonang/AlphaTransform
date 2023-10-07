@@ -12,7 +12,6 @@ from alphagen.rl.env.wrapper import AlphaEnv
 from alphagen.rl.policy import LSTMSharedNet
 from alphagen.utils.random import reseed_everything
 from alphagen.rl.env.core import AlphaEnvCore
-from backtester.StrategySimulator import StrategySimulator
 
 
 class CustomCallback(BaseCallback):
@@ -20,7 +19,6 @@ class CustomCallback(BaseCallback):
                  save_freq: int,
                  show_freq: int,
                  save_path: str,
-                 strategy_simulator: StrategySimulator,
                  name_prefix: str = 'rl_model',
                  timestamp: Optional[str] = None,
                  verbose: bool = False):
@@ -30,8 +28,6 @@ class CustomCallback(BaseCallback):
         self.save_path = save_path
         self.name_prefix = name_prefix
         self.verbose = verbose
-
-        self.strategy_simulator = strategy_simulator
 
         if timestamp is None:
             self.timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -100,8 +96,6 @@ def main(
     os_start = '2017-01-03'
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # Initialize simulator
-    strategy_simulator = StrategySimulator(sim_start, sim_end, is_start, os_start)
 
     env = AlphaEnv(device=device, print_expr=True)
 
@@ -112,7 +106,6 @@ def main(
         save_freq=10000,
         show_freq=10000,
         save_path='./checkpoints',
-        strategy_simulator=strategy_simulator,
         name_prefix=name_prefix,
         timestamp=timestamp,
         verbose=1,
@@ -152,6 +145,7 @@ def fire_helper(
     if isinstance(seed, int):
         seed = (seed, )
     default_steps = {
+        1: 100_000,
         10: 250_000,
         20: 300_000,
         50: 350_000,
@@ -160,7 +154,7 @@ def fire_helper(
     for _seed in seed:
         main(_seed,
              instruments,
-             default_steps[10] if steps is None else int(steps)
+             default_steps[1] if steps is None else int(steps)
              )
 
 

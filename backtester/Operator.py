@@ -115,6 +115,7 @@ class BinaryOperator(Operator):
         try:
             result = self.apply(self._lhs.evaluate(), self._rhs.evaluate())
         except:
+            print("OPPOSITE BINARY (lhs, rhs):", self._lhs, self._rhs)
             result = self.apply(self._rhs.evaluate(), self._lhs.evaluate())
         return result
 

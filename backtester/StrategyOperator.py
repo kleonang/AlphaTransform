@@ -1,4 +1,4 @@
-from backtester.Operator import BinaryOperator, UnaryOperator, RollingOperator, Constant, DeltaTime
+from backtester.Operator import BinaryOperator, UnaryOperator, RollingOperator
 import pandas as pd
 import numpy as np
 
@@ -26,6 +26,8 @@ class Sigmoid(UnaryOperator):
 
 class Exp(UnaryOperator):
     def apply(self, data: pd.DataFrame) -> pd.DataFrame: 
+        # Convert to float128 to avoid overflow
+        data = data.astype(np.float128)
         return data.apply(lambda x: np.exp(x))
 
 class Flip(UnaryOperator):
@@ -35,7 +37,7 @@ class Flip(UnaryOperator):
 
 class Invert(UnaryOperator):
     def apply(self, data: pd.DataFrame) -> pd.DataFrame: 
-        return 1 / data if 0 not in data.values else np.nan
+        return 1 / data
     
 
 class Multiply(BinaryOperator): 
@@ -60,7 +62,7 @@ class Subtract(BinaryOperator):
 
 class TsRank(RollingOperator):
     def apply(self, data: pd.DataFrame, window: int) -> pd.DataFrame: 
-        return data.rolling(window).apply(lambda x: pd.Series(x).rank(pct=True).iloc[-1])
+        return data.rolling(window).rank(pct=True)
 
 
 class TsZscore(RollingOperator):
@@ -71,7 +73,7 @@ class TsZscore(RollingOperator):
 class TsZscoreRank(RollingOperator):
     def apply(self, data: pd.DataFrame, window: int) -> pd.DataFrame: 
         ts_zscore = (data - data.rolling(window).mean()) / data.rolling(window).std()
-        return ts_zscore.rolling(window).apply(lambda x: pd.Series(x).rank(pct=True).iloc[-1])
+        return ts_zscore.rolling(window).rank(pct=True)
     
 
 class TsMean(RollingOperator):
@@ -86,7 +88,7 @@ class TsStd(RollingOperator):
 
 class TsChange(RollingOperator):
     def apply(self, data: pd.DataFrame, window: int) -> pd.DataFrame:
-        return data.pct_change(window)
+        return data.pct_change(periods=window, fill_method=None)
     
 
 class TsDelta(RollingOperator):

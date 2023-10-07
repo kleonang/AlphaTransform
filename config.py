@@ -1,7 +1,7 @@
 from backtester.SimulationData import *
 from backtester.StrategyOperator import *
 
-MAX_EXPR_LENGTH = 20
+MAX_EXPR_LENGTH = 7
 
 # OPERATORS = [
 #     # Unary
