@@ -87,13 +87,6 @@ def main(
     steps: int = 200_000
 ):
     reseed_everything(seed)
-
-    # Set simulation start and end dates
-    sim_start = '2011-01-01'
-    sim_end = '2017-12-07'
-    # Set in-sample and out-of-sample start dates
-    is_start = '2013-04-10'
-    os_start = '2017-01-03'
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

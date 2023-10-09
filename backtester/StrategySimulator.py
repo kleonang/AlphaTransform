@@ -93,6 +93,8 @@ class StrategySimulator:
             return strategy_simulation.get_ic('is', strategy_weights)
         elif loss == "RIC":
             return strategy_simulation.get_ric('is', strategy_weights)
+        elif loss == "Sharpe":
+            return strategy_simulation.get_sharpe('is')
         else:
             raise ValueError("Invalid loss function: {}".format(loss))
 
