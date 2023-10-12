@@ -9,7 +9,7 @@ from sb3_contrib.ppo_mask import MaskablePPO
 from stable_baselines3.common.callbacks import BaseCallback
 
 from alphagen.rl.env.wrapper import AlphaEnv
-from alphagen.rl.policy import LSTMSharedNet
+from alphagen.rl.policy import LSTMSharedNet, TransformerSharedNet
 from alphagen.utils.random import reseed_everything
 from alphagen.rl.env.core import AlphaEnvCore
 
@@ -43,13 +43,6 @@ class CustomCallback(BaseCallback):
 
     def _on_rollout_end(self) -> None:
         assert self.logger is not None
-        # self.logger.record('pool/size', self.pool.size)
-        # self.logger.record('pool/significant', (np.abs(self.pool.weights[:self.pool.size]) > 1e-4).sum())
-        # self.logger.record('pool/best_ic_ret', self.pool.best_ic_ret)
-        # self.logger.record('pool/eval_cnt', self.pool.eval_cnt)
-        # ic_test, rank_ic_test = self.pool.test_ensemble(self.test_calculator)
-        # self.logger.record('test/ic', ic_test)
-        # self.logger.record('test/rank_ic', rank_ic_test)
         self.save_checkpoint()
 
     def save_checkpoint(self):
@@ -57,24 +50,6 @@ class CustomCallback(BaseCallback):
         self.model.save(path)   # type: ignore
         if self.verbose:
             print(f'Saving model checkpoint to {path}')
-        # with open(f'{path}_pool.json', 'w') as f:
-        #     json.dump(self.pool.to_dict(), f)
-
-    # def show_pool_state(self):
-    #     state = self.pool.state
-    #     n = len(state['exprs'])
-    #     print('---------------------------------------------')
-    #     for i in range(n):
-    #         weight = state['weights'][i]
-    #         expr_str = str(state['exprs'][i])
-    #         ic_ret = state['ics_ret'][i]
-    #         print(f'> Alpha #{i}: {weight}, {expr_str}, {ic_ret}')
-    #     print(f'>> Ensemble ic_ret: {state["best_ic_ret"]}')
-    #     print('---------------------------------------------')
-
-    # @property
-    # def pool(self) -> AlphaPoolBase:
-    #     return self.env_core.pool
 
     @property
     def env_core(self) -> AlphaEnvCore:
@@ -107,11 +82,23 @@ def main(
     model = MaskablePPO(
         'MlpPolicy',
         env,
+        # UNCOMMENT FOR LSTM POLICY
+        # policy_kwargs=dict(
+        #     features_extractor_class=LSTMSharedNet,
+        #     features_extractor_kwargs=dict(
+        #         n_layers=2,
+        #         d_model=128,
+        #         dropout=0.1,
+        #         device=device,
+        #     ),
+        # ),
         policy_kwargs=dict(
-            features_extractor_class=LSTMSharedNet,
+            features_extractor_class=TransformerSharedNet,
             features_extractor_kwargs=dict(
-                n_layers=2,
+                n_encoder_layers=2,
                 d_model=128,
+                n_head=4,
+                d_ffn=256,
                 dropout=0.1,
                 device=device,
             ),

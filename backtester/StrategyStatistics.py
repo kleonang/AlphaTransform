@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from backtester.SimulationData import Returns
 from backtester.StrategyOperator import Neutralize
-from alphagen.data.tokens import FeatureToken, OperatorToken
-from alphagen.data.tree import ExpressionBuilder
+from alphagen.representation.tokens import FeatureToken, OperatorToken
+from alphagen.representation.tree import ExpressionBuilder
 
 class StrategyStatistics:
     # Class that provides methods for calculating quant backtesting statistics

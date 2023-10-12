@@ -2,78 +2,78 @@ import pandas as pd
 from backtester.StrategyStatistics import StrategyStatistics
 
 class StrategySimulation:
-    def __init__(self, strategy_returns: pd.Series, sim_start: str, sim_end: str, is_start: str, os_start: str):
+    def __init__(self, strategy_returns: pd.Series, sim_start: str, sim_end: str, train_start: str, test_start: str):
         self.sim_start = sim_start
         self.sim_end = sim_end
-        self.is_start = is_start
-        self.os_start = os_start
-        self.strategy_is_statistics = StrategyStatistics(strategy_returns.loc[is_start:os_start])
-        self.strategy_os_statistics = StrategyStatistics(strategy_returns.loc[os_start:sim_end])
+        self.train_start = train_start
+        self.test_start = test_start
+        self.strategy_train_statistics = StrategyStatistics(strategy_returns.loc[train_start:test_start])
+        self.strategy_test_statistics = StrategyStatistics(strategy_returns.loc[test_start:sim_end])
         
-    def get_sharpe(self, is_or_os: str):
+    def get_sharpe(self, train_or_test: str):
         # Calculates the sharpe ratio for the in-sample or out-of-sample period
-        if is_or_os == 'is':
-            return self.strategy_is_statistics.sharpe()
-        elif is_or_os == 'os':
-            return self.strategy_os_statistics.sharpe()
+        if train_or_test == 'train':
+            return self.strategy_train_statistics.sharpe()
+        elif train_or_test == 'test':
+            return self.strategy_test_statistics.sharpe()
         else:
-            raise ValueError('is_or_os must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "is" or "os"')
         
-    def get_max_drawdown(self, is_or_os: str):
+    def get_max_drawdown(self, train_or_test: str):
         # Calculates the maximum drawdown for the in-sample or out-of-sample period
-        if is_or_os == 'is':
-            return self.strategy_is_statistics.max_drawdown()
-        elif is_or_os == 'os':
-            return self.strategy_os_statistics.max_drawdown()
+        if train_or_test == 'train':
+            return self.strategy_train_statistics.max_drawdown()
+        elif train_or_test == 'test':
+            return self.strategy_test_statistics.max_drawdown()
         else:
-            raise ValueError('is_or_os must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "is" or "os"')
         
-    def get_sortino(self, is_or_os: str):
+    def get_sortino(self, train_or_test: str):
         # Calculates the sortino ratio for the in-sample or out-of-sample period
-        if is_or_os == 'is':
-            return self.strategy_is_statistics.sortino()
-        elif is_or_os == 'os':
-            return self.strategy_os_statistics.sortino()
+        if train_or_test == 'train':
+            return self.strategy_train_statistics.sortino()
+        elif train_or_test == 'test':
+            return self.strategy_test_statistics.sortino()
         else:
-            raise ValueError('is_or_os must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "is" or "os"')
         
-    def get_calmar(self, is_or_os: str):
+    def get_calmar(self, train_or_test: str):
         # Calculates the calmar ratio for the in-sample or out-of-sample period
-        if is_or_os == 'is':
-            return self.strategy_is_statistics.calmar()
-        elif is_or_os == 'os':
-            return self.strategy_os_statistics.calmar()
+        if train_or_test == 'train':
+            return self.strategy_train_statistics.calmar()
+        elif train_or_test == 'test':
+            return self.strategy_test_statistics.calmar()
         else:
-            raise ValueError('is_or_os must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "is" or "os"')
         
-    def get_cagr(self, is_or_os: str):
+    def get_cagr(self, train_or_test: str):
         # Calculates the CAGR for the in-sample or out-of-sample period
-        if is_or_os == 'is':
-            return self.strategy_is_statistics.cagr()
-        elif is_or_os == 'os':
-            return self.strategy_os_statistics.cagr()
+        if train_or_test == 'train':
+            return self.strategy_train_statistics.cagr()
+        elif train_or_test == 'test':
+            return self.strategy_test_statistics.cagr()
         else:
-            raise ValueError('is_or_os must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "is" or "os"')
 
-    def get_ic(self, is_or_os: str, strategy_weights: pd.DataFrame):
+    def get_ic(self, train_or_test: str, strategy_weights: pd.DataFrame):
         # Calculates the information coefficient for the in-sample or out-of-sample period
-        if is_or_os == 'is':
-            return self.strategy_is_statistics.ic(strategy_weights)
-        elif is_or_os == 'os':
-            return self.strategy_os_statistics.ic(strategy_weights)
+        if train_or_test == 'train':
+            return self.strategy_train_statistics.ic(strategy_weights)
+        elif train_or_test == 'test':
+            return self.strategy_test_statistics.ic(strategy_weights)
         else:
-            raise ValueError('is_or_os must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "is" or "os"')
 
-    def get_ric(self, is_or_os: str, strategy_weights: pd.DataFrame):
+    def get_ric(self, train_or_test: str, strategy_weights: pd.DataFrame):
         # Calculates the rank information coefficient for the in-sample or out-of-sample period
-        if is_or_os == 'is':
-            return self.strategy_is_statistics.ric(strategy_weights)
-        elif is_or_os == 'os':
-            return self.strategy_os_statistics.ric(strategy_weights)
+        if train_or_test == 'train':
+            return self.strategy_train_statistics.ric(strategy_weights)
+        elif train_or_test == 'test':
+            return self.strategy_test_statistics.ric(strategy_weights)
         else:
-            raise ValueError('is_or_os must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "is" or "os"')
 
     def get_os_is_ratio(self):
         # Calculates the ratio of out-of-sample to in-sample sharpe ratios
-        return self.get_sharpe('os') / self.get_sharpe('is')
+        return self.get_sharpe('test') / self.get_sharpe('train')
         

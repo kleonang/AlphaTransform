@@ -1,15 +1,15 @@
 from typing import Tuple, Optional, List
-from backtester.StrategySimulator import StrategySimulator
 import gymnasium as gym
 import math
 import torch
 
-from config import MAX_EXPR_LENGTH, SIM_START, SIM_END, IS_START, OS_START, DELAY
-from alphagen.data.tokens import *
+from config import MAX_EXPR_LENGTH, SIM_START, SIM_END, TRAIN_START, TEST_START, DELAY, MIN_REWARD
+from alphagen.representation.tokens import *
+from alphagen.representation.tree import ExpressionBuilder
+from alphagen.utils import reseed_everything
 from backtester.Operator import *
 from backtester.StrategyOperator import Neutralize
-from alphagen.data.tree import ExpressionBuilder
-from alphagen.utils import reseed_everything
+from backtester.StrategySimulator import StrategySimulator
 
 class AlphaEnvCore(gym.Env):
     _tokens: List[Token]
@@ -26,7 +26,7 @@ class AlphaEnvCore(gym.Env):
         self._device = device
 
         self.eval_cnt = 0
-        self.strategy_simulator = StrategySimulator(SIM_START, SIM_END, IS_START, OS_START, DELAY)
+        self.strategy_simulator = StrategySimulator(SIM_START, SIM_END, TRAIN_START, TEST_START, DELAY)
         self.render_mode = None
 
     def reset(
@@ -63,12 +63,12 @@ class AlphaEnvCore(gym.Env):
                 self._builder.add_token(neutralize)
                 reward = self._evaluate()
             else:
-                reward = -1.    
+                reward = MIN_REWARD
 
         if math.isnan(reward):
-            reward = -1.
+            reward = MIN_REWARD
 
-        truncated = False  # Fk gymnasium
+        truncated = False  # For gymnasium
         return self._tokens, reward, done, truncated, self._valid_action_types()
 
     def _evaluate(self):
@@ -76,11 +76,12 @@ class AlphaEnvCore(gym.Env):
         if self._print_expr:
             print(expr)
         try:
-            ret = self.strategy_simulator.loss_from_expression(expr, loss='IC')
+            loss = 'Sharpe' # 'IC' or 'RIC' or 'Sharpe'
+            ret = self.strategy_simulator.loss_from_expression(expr, loss=loss)
             if math.isnan(ret):
-                print("Casting nan to -1")
-                ret = -1
-            print("IC:", ret)
+                print(f"Casting nan to {MIN_REWARD}")
+                ret = MIN_REWARD
+            print(f"{loss}: {ret}")
             self.eval_cnt += 1
             return ret
         except OutOfDataRangeError:

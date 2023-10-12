@@ -1,5 +1,5 @@
 from backtester.Operator import *
-from alphagen.data.tokens import *
+from alphagen.representation.tokens import *
 from backtester.SimulationData import *
 from backtester.StrategyOperator import *
 from typing import List

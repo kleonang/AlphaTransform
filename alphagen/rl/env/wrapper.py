@@ -3,7 +3,7 @@ import gymnasium as gym
 import numpy as np
 
 from config import *
-from alphagen.data.tokens import *
+from alphagen.representation.tokens import *
 from alphagen.rl.env.core import AlphaEnvCore
 
 SIZE_NULL = 1
