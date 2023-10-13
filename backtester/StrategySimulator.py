@@ -63,7 +63,7 @@ class StrategySimulator:
         # Print simulation statistics
         print('Train Sharpe Ratio: {}'.format(strategy_simulation.get_sharpe('train')))
         print('Test Sharpe Ratio: {}'.format(strategy_simulation.get_sharpe('test')))
-        print('OS/IS Ratio: {}'.format(strategy_simulation.get_os_is_ratio()))
+        print('Test/Train Ratio: {}'.format(strategy_simulation.get_test_train_ratio()))
         print()
         print('Train IC: {}'.format(strategy_simulation.get_ic('train', strategy_weights)))
         print('Test IC: {}'.format(strategy_simulation.get_ic('test', strategy_weights)))

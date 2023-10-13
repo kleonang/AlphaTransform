@@ -17,7 +17,7 @@ class StrategySimulation:
         elif train_or_test == 'test':
             return self.strategy_test_statistics.sharpe()
         else:
-            raise ValueError('train_or_test must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "train" or "test"')
         
     def get_max_drawdown(self, train_or_test: str):
         # Calculates the maximum drawdown for the in-sample or out-of-sample period
@@ -26,7 +26,7 @@ class StrategySimulation:
         elif train_or_test == 'test':
             return self.strategy_test_statistics.max_drawdown()
         else:
-            raise ValueError('train_or_test must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "train" or "test"')
         
     def get_sortino(self, train_or_test: str):
         # Calculates the sortino ratio for the in-sample or out-of-sample period
@@ -35,7 +35,7 @@ class StrategySimulation:
         elif train_or_test == 'test':
             return self.strategy_test_statistics.sortino()
         else:
-            raise ValueError('train_or_test must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "train" or "test"')
         
     def get_calmar(self, train_or_test: str):
         # Calculates the calmar ratio for the in-sample or out-of-sample period
@@ -44,7 +44,7 @@ class StrategySimulation:
         elif train_or_test == 'test':
             return self.strategy_test_statistics.calmar()
         else:
-            raise ValueError('train_or_test must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "train" or "test"')
         
     def get_cagr(self, train_or_test: str):
         # Calculates the CAGR for the in-sample or out-of-sample period
@@ -53,7 +53,7 @@ class StrategySimulation:
         elif train_or_test == 'test':
             return self.strategy_test_statistics.cagr()
         else:
-            raise ValueError('train_or_test must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "train" or "test"')
 
     def get_ic(self, train_or_test: str, strategy_weights: pd.DataFrame):
         # Calculates the information coefficient for the in-sample or out-of-sample period
@@ -62,7 +62,7 @@ class StrategySimulation:
         elif train_or_test == 'test':
             return self.strategy_test_statistics.ic(strategy_weights)
         else:
-            raise ValueError('train_or_test must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "train" or "test"')
 
     def get_ric(self, train_or_test: str, strategy_weights: pd.DataFrame):
         # Calculates the rank information coefficient for the in-sample or out-of-sample period
@@ -71,9 +71,9 @@ class StrategySimulation:
         elif train_or_test == 'test':
             return self.strategy_test_statistics.ric(strategy_weights)
         else:
-            raise ValueError('train_or_test must be either "is" or "os"')
+            raise ValueError('train_or_test must be either "train" or "test"')
 
-    def get_os_is_ratio(self):
+    def get_test_train_ratio(self):
         # Calculates the ratio of out-of-sample to in-sample sharpe ratios
         return self.get_sharpe('test') / self.get_sharpe('train')
         
