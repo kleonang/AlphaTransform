@@ -3,6 +3,7 @@ from typing import Optional, Tuple, Union
 from datetime import datetime
 import fire
 import torch
+import warnings
 
 import numpy as np
 from sb3_contrib.ppo_mask import MaskablePPO
@@ -12,7 +13,6 @@ from alphagen.rl.env.wrapper import AlphaEnv
 from alphagen.rl.policy import LSTMSharedNet, TransformerSharedNet
 from alphagen.utils.random import reseed_everything
 from alphagen.rl.env.core import AlphaEnvCore
-
 
 class CustomCallback(BaseCallback):
     def __init__(self,
@@ -61,10 +61,10 @@ def main(
     instruments: str = "nasdaq",
     steps: int = 200_000
 ):
+    warnings.filterwarnings('ignore')
     reseed_everything(seed)
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
     env = AlphaEnv(device=device, print_expr=True)
 
     name_prefix = f"new_{instruments}_{seed}"

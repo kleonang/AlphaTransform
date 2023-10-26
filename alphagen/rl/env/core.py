@@ -12,9 +12,9 @@ from backtester.StrategyOperator import Neutralize
 from backtester.StrategySimulator import StrategySimulator
 
 class AlphaEnvCore(gym.Env):
-    _tokens: List[Token]
-    _builder: ExpressionBuilder
-    _print_expr: bool
+    # _tokens: List[Token]
+    # _builder: ExpressionBuilder
+    # _print_expr: bool
 
     def __init__(self,
                  device: torch.device = torch.device('cpu'),
@@ -85,7 +85,7 @@ class AlphaEnvCore(gym.Env):
             self.eval_cnt += 1
             return ret
         except OutOfDataRangeError:
-            return 0.
+            return 0. # Change to MIN_REWARD?
 
     def _valid_action_types(self) -> dict:
         valid_op_unary = self._builder.validate_op(UnaryOperator)

@@ -35,20 +35,20 @@ class TransformerSharedNet(BaseFeaturesExtractor):
         super().__init__(observation_space, d_model)
 
         assert isinstance(observation_space, gym.spaces.Box)
-        n_actions = observation_space.high[0] + 1                   # type: ignore
+        n_actions = observation_space.high[0] + 1                   
 
         self._device = device
         self._d_model = d_model
         self._n_actions: float = n_actions
 
-        self._token_emb = nn.Embedding(n_actions + 1, d_model, 0)   # Last one is [BEG]
+        self._token_emb = nn.Embedding(n_actions + 1, d_model, 0)  # Include [BEG] token
         self._pos_enc = PositionalEncoding(d_model).to(device)
 
         self._transformer = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(
                 d_model=d_model, nhead=n_head,
                 dim_feedforward=d_ffn, dropout=dropout,
-                activation=lambda x: F.leaky_relu(x),               # type: ignore
+                activation=lambda x: F.leaky_relu(x),            
                 batch_first=True, device=device
             ),
             num_layers=n_encoder_layers,
@@ -77,13 +77,13 @@ class LSTMSharedNet(BaseFeaturesExtractor):
         super().__init__(observation_space, d_model)
 
         assert isinstance(observation_space, gym.spaces.Box)
-        n_actions = observation_space.high[0] + 1                   # type: ignore
+        n_actions = observation_space.high[0] + 1
 
         self._device = device
         self._d_model = d_model
         self._n_actions: float = n_actions
 
-        self._token_emb = nn.Embedding(n_actions + 1, d_model, 0)   # Last one is [BEG]
+        self._token_emb = nn.Embedding(n_actions + 1, d_model, 0)  # Include [BEG] token
         self._pos_enc = PositionalEncoding(d_model).to(device)
 
         self._lstm = nn.LSTM(
@@ -118,13 +118,13 @@ class Decoder(BaseFeaturesExtractor):
         super().__init__(observation_space, d_model)
 
         assert isinstance(observation_space, gym.spaces.Box)
-        n_actions = observation_space.high[0] + 1                   # type: ignore
+        n_actions = observation_space.high[0] + 1
 
         self._device = device
         self._d_model = d_model
         self._n_actions: float = n_actions
 
-        self._token_emb = nn.Embedding(n_actions + 1, d_model, 0)   # Last one is [BEG]
+        self._token_emb = nn.Embedding(n_actions + 1, d_model, 0)  # Include [BEG] token
         self._pos_enc = PositionalEncoding(d_model).to(device)
 
         # Actually an encoder for now

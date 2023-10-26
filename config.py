@@ -1,7 +1,7 @@
 from backtester.SimulationData import *
 from backtester.StrategyOperator import *
 
-MAX_EXPR_LENGTH = 7
+MAX_EXPR_LENGTH = 20
 
 # OPERATORS = [op for op in dir(StrategyOperator) if 'Operator' not in op and op[0].isupper()]
 
@@ -12,7 +12,7 @@ OPERATORS = [ # Unary
             # Rolling
             TsRank, TsZscore, TsZscoreRank, TsMean, TsStd, TsChange, TsDelta, TsSkewness, TsKurtosis]
 
-DELTA_TIMES = [10, 20, 30, 40, 50]
+DELTA_TIMES = [1, 3, 5, 10, 20, 60, 90, 120, 180, 252]
 
 CONSTANTS = [-30., -10., -5., -2., -1., -0.5, -0.01, 0.01, 0.5, 1., 2., 5., 10., 30.]
 

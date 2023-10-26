@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from config import MIN_REWARD
 from backtester.Operator import Expression
 from backtester.StrategyOperator import *
 from backtester.StrategySimulation import StrategySimulation
@@ -84,16 +85,17 @@ class StrategySimulator:
         strategy_returns = self.simulate_strategy_returns(strategy_weights)
         strategy_simulation = StrategySimulation(strategy_returns, self.sim_start, self.sim_end, self.train_start, self.test_start)
         # Return loss
-        if not isinstance(strategy_weights, pd.DataFrame):
-            return -1
-        if loss == "IC":
-            return strategy_simulation.get_ic('train', strategy_weights)
-        elif loss == "RIC":
-            return strategy_simulation.get_ric('train', strategy_weights)
-        elif loss == "Sharpe":
-            return strategy_simulation.get_sharpe('train')
-        else:
-            raise ValueError("Invalid loss function: {}".format(loss))
+        try:
+            if loss == "IC":
+                return strategy_simulation.get_ic('train', strategy_weights)
+            elif loss == "RIC":
+                return strategy_simulation.get_ric('train', strategy_weights)
+            elif loss == "Sharpe":
+                return strategy_simulation.get_sharpe('train')
+            else:
+                raise ValueError("Invalid loss function: {}".format(loss))
+        except:
+            return MIN_REWARD
 
 if __name__ == '__main__':
     # Set simulation start and end dates
