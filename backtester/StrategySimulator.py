@@ -46,7 +46,7 @@ class StrategySimulator:
             print("Max weight:", round(strategy_weights.abs().max().max() * 100, 2), "%\n")
             print("strat returns:", strategy_returns.loc[self.train_start:self.sim_end], "\n")
 
-            # Plot strategy returns with is in green and os in red
+            # Plot strategy returns with train period in green and test period in red
             plt.figure(figsize=(16,9))
             cumulative_returns = strategy_returns.loc[self.train_start:self.sim_end].cumsum()
             cumulative_returns.loc[self.train_start:self.test_start].plot(color='green')
@@ -102,9 +102,9 @@ if __name__ == '__main__':
     sim_start = '2011-01-01'
     sim_end = '2017-12-07'
     # Set Train and Test start dates
-    is_start = '2013-04-10'
-    os_start = '2017-01-03'
+    train_start = '2013-04-10'
+    test_start = '2017-01-03'
     # Initialize simulator
-    strategy_simulator = StrategySimulator(sim_start, sim_end, is_start, os_start)
+    strategy_simulator = StrategySimulator(sim_start, sim_end, train_start, test_start)
     # Simulate strategy
     strategy_simulator.simulate()
