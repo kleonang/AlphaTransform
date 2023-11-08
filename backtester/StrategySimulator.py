@@ -5,7 +5,7 @@ from backtester.Operator import Expression
 from backtester.StrategyOperator import *
 from backtester.StrategySimulation import StrategySimulation
 from backtester.SimulationData import Returns, Open, Close, Low, High
-from alphagen.representation.tokens import FeatureToken, OperatorToken, DeltaTimeToken
+from alphagen.representation.tokens import FeatureToken, OperatorToken, DeltaTimeToken, Token
 from alphagen.representation.tree import ExpressionBuilder
 
 class StrategySimulator:
@@ -23,12 +23,18 @@ class StrategySimulator:
         # Example of a strategy: 3-day mean reversion
         tokens = [
             FeatureToken(Returns(self.sim_start, self.sim_end, delay=self.delay)),
-            DeltaTimeToken(3),
+            DeltaTimeToken(1),
             OperatorToken(TsMean),
             OperatorToken(Rank),
             OperatorToken(Flip),
             OperatorToken(Neutralize)
         ]
+        builder = ExpressionBuilder()
+        for token in tokens:
+            builder.add_token(token)
+        return builder.evaluate()
+
+    def generate_strategy_weights_from_tokens(self, tokens: 'list[Token]') -> pd.DataFrame:
         builder = ExpressionBuilder()
         for token in tokens:
             builder.add_token(token)
@@ -48,9 +54,14 @@ class StrategySimulator:
 
             # Plot strategy returns with train period in green and test period in red
             plt.figure(figsize=(16,9))
-            cumulative_returns = strategy_returns.loc[self.train_start:self.sim_end].cumsum()
+            cumulative_returns = (strategy_returns.loc[self.train_start:self.sim_end] + 1).cumprod() - 1
             cumulative_returns.loc[self.train_start:self.test_start].plot(color='green')
             cumulative_returns.loc[self.test_start:self.sim_end].plot(color='red')
+
+            # Use log scale for y axis if cumulative returns are greater than 100,000%
+            if cumulative_returns.max() > 1000:
+                plt.yscale('log')
+
             plt.ylabel('returns')
             plt.title('Strategy Returns')
             plt.show()
@@ -80,22 +91,45 @@ class StrategySimulator:
         print('Test Calmar Ratio: {}'.format(strategy_simulation.get_calmar('test')))
         print()
 
-    def loss_from_expression(self, tree: Expression, loss: str = 'IC') -> float:
+    def simulate_tokens(self, tokens: 'list[Token]'):
+        strategy_weights = self.generate_strategy_weights_from_tokens(tokens)
+        strategy_returns = self.simulate_strategy_returns(strategy_weights, verbose=True)
+        strategy_simulation = StrategySimulation(strategy_returns, self.sim_start, self.sim_end, self.train_start, self.test_start)
+        # Print simulation statistics
+        print('Train Sharpe Ratio: {}'.format(strategy_simulation.get_sharpe('train')))
+        print('Test Sharpe Ratio: {}'.format(strategy_simulation.get_sharpe('test')))
+        print('Test/Train Ratio: {}'.format(strategy_simulation.get_test_train_ratio()))
+        print()
+        print('Train IC: {}'.format(strategy_simulation.get_ic('train', strategy_weights)))
+        print('Test IC: {}'.format(strategy_simulation.get_ic('test', strategy_weights)))
+        print('Train RIC: {}'.format(strategy_simulation.get_ric('train', strategy_weights)))
+        print('Test RIC: {}'.format(strategy_simulation.get_ric('test', strategy_weights)))
+        print('Train CAGR: {}'.format(strategy_simulation.get_cagr('train')))
+        print('Test CAGR: {}'.format(strategy_simulation.get_cagr('test')))
+        print('Train Max Drawdown: {}'.format(strategy_simulation.get_max_drawdown('train')))
+        print('Test Max Drawdown: {}'.format(strategy_simulation.get_max_drawdown('test')))
+        print('Train Sortino Ratio: {}'.format(strategy_simulation.get_sortino('train')))
+        print('Test Sortino Ratio: {}'.format(strategy_simulation.get_sortino('test')))
+        print('Train Calmar Ratio: {}'.format(strategy_simulation.get_calmar('train')))
+        print('Test Calmar Ratio: {}'.format(strategy_simulation.get_calmar('test')))
+        print()
+
+    def loss_from_expression(self, tree: Expression, loss: str = 'IC', train_or_test: str = 'train') -> float:
         strategy_weights = tree.evaluate()
         strategy_returns = self.simulate_strategy_returns(strategy_weights)
         strategy_simulation = StrategySimulation(strategy_returns, self.sim_start, self.sim_end, self.train_start, self.test_start)
         # Return loss
         try:
             if loss == "IC":
-                return strategy_simulation.get_ic('train', strategy_weights)
+                return strategy_simulation.get_ic(train_or_test, strategy_weights)
             elif loss == "RIC":
-                return strategy_simulation.get_ric('train', strategy_weights)
+                return strategy_simulation.get_ric(train_or_test, strategy_weights)
             elif loss == "Sharpe":
-                return strategy_simulation.get_sharpe('train')
+                return strategy_simulation.get_sharpe(train_or_test)
             else:
                 raise ValueError("Invalid loss function: {}".format(loss))
         except:
-            return MIN_REWARD
+            return MIN_REWARD[loss]
 
 if __name__ == '__main__':
     # Set simulation start and end dates

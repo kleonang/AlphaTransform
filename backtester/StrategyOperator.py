@@ -1,4 +1,4 @@
-from backtester.Operator import BinaryOperator, UnaryOperator, RollingOperator
+from backtester.Operator import BinaryOperator, PairRollingOperator, UnaryOperator, RollingOperator
 import pandas as pd
 import numpy as np
 
@@ -133,3 +133,11 @@ class Normalize(UnaryOperator):
     def apply(self, data: pd.DataFrame) -> pd.DataFrame: 
         # Normalizes the strategy weights (demean and divide by std dev)
         return (data - data.mean(axis=1).values.reshape(-1, 1)) / data.std(axis=1).values.reshape(-1, 1)
+
+class Cov(PairRollingOperator):
+    def apply(self, lhs: pd.DataFrame, rhs: pd.DataFrame, window: int) -> pd.DataFrame:
+        return lhs.rolling(window).cov(rhs)
+
+class Corr(PairRollingOperator):
+    def apply(self, lhs: pd.DataFrame, rhs: pd.DataFrame, window: int) -> pd.DataFrame:
+        return lhs.rolling(window).corr(rhs)

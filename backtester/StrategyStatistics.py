@@ -31,8 +31,7 @@ class StrategyStatistics:
     
     def calmar(self):
         # Calculates the calmar ratio for strategy
-        period_returns = (self.returns_series + 1).prod() - 1
-        return period_returns / self.max_drawdown()
+        return self.cagr() / self.max_drawdown()
     
     def cagr(self):
         # Calculates the CAGR for strategy

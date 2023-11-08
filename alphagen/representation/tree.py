@@ -16,7 +16,7 @@ class ExpressionBuilder:
 
     def add_token(self, token: Token):
         if not self.validate(token):
-            raise InvalidExpressionException(f"Token {token} not allowed here, stack: {self.stack}.")
+            raise InvalidExpressionException(f"Token {token} of type {type(token)} not allowed here, stack: {self.stack}.")
         if isinstance(token, OperatorToken):
             n_args: int = token.operator.n_args()
             children = []

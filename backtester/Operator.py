@@ -125,9 +125,6 @@ class BinaryOperator(Operator):
     @property
     def is_feature(self): return self._lhs.is_feature or self._rhs.is_feature
 
-    @classmethod
-    def is_rolling(cls): return False
-
 
 class RollingOperator(Operator):
     def __init__(self, operand: Union[Expression, float], delta_time: Union[int, DeltaTime]) -> None:
@@ -154,8 +151,6 @@ class RollingOperator(Operator):
     @property
     def is_feature(self): return self._operand.is_feature
 
-    @classmethod
-    def is_rolling(cls): return True
 
 class PairRollingOperator(Operator):
     def __init__(self,
@@ -174,13 +169,13 @@ class PairRollingOperator(Operator):
     def category_type(cls) -> Type['Operator']: return PairRollingOperator
 
     @abstractmethod
-    def apply(self, lhs: pd.DataFrame, rhs: pd.DataFrame) -> pd.DataFrame: ...
+    def apply(self, lhs: pd.DataFrame, rhs: pd.DataFrame, window: DeltaTime) -> pd.DataFrame: ...
 
     def evaluate(self) -> pd.DataFrame:
-        return self.apply(self._lhs.evaluate(), self._rhs.evaluate())
+        return self.apply(self._lhs.evaluate(), self._rhs.evaluate(), self._delta_time)
 
     def __str__(self) -> str:
         return f"{type(self).__name__}({self._lhs},{self._rhs},{self._delta_time})"
 
     @property
-    def is_featured(self): return self._lhs.is_feature or self._rhs.is_feature
+    def is_feature(self): return self._lhs.is_feature or self._rhs.is_feature

@@ -18,12 +18,14 @@ class AlphaEnvCore(gym.Env):
 
     def __init__(self,
                  device: torch.device = torch.device('cpu'),
-                 print_expr: bool = False
+                 print_expr: bool = False,
+                 loss_metric: str = 'Sharpe' # 'IC' or 'RIC' or 'Sharpe'
                  ):
         super().__init__()
 
         self._print_expr = print_expr
         self._device = device
+        self._loss_metric = loss_metric
 
         self.eval_cnt = 0
         self.strategy_simulator = StrategySimulator(SIM_START, SIM_END, TRAIN_START, TEST_START, DELAY)
@@ -50,10 +52,14 @@ class AlphaEnvCore(gym.Env):
             reward = self._evaluate()
             done = True
         elif len(self._tokens) < MAX_EXPR_LENGTH:
-            self._tokens.append(action)
-            self._builder.add_token(action)
-            done = False
-            reward = 0.0
+            try: 
+                self._tokens.append(action)
+                self._builder.add_token(action)
+                done = False
+                reward = 0.0
+            except:
+                done = True
+                reward = MIN_REWARD[self._loss_metric]
         else:
             done = True
             if self._builder.is_valid():
@@ -63,10 +69,10 @@ class AlphaEnvCore(gym.Env):
                 self._builder.add_token(neutralize)
                 reward = self._evaluate()
             else:
-                reward = MIN_REWARD
+                reward = MIN_REWARD[self._loss_metric]
 
         if math.isnan(reward):
-            reward = MIN_REWARD
+            reward = MIN_REWARD[self._loss_metric]
 
         truncated = False  # For gymnasium
         return self._tokens, reward, done, truncated, self._valid_action_types()
@@ -76,16 +82,15 @@ class AlphaEnvCore(gym.Env):
         if self._print_expr:
             print(expr)
         try:
-            loss = 'Sharpe' # 'IC' or 'RIC' or 'Sharpe'
-            ret = self.strategy_simulator.loss_from_expression(expr, loss=loss)
+            ret = self.strategy_simulator.loss_from_expression(expr, loss=self._loss_metric)
             if math.isnan(ret):
-                print(f"Casting nan to {MIN_REWARD}")
-                ret = MIN_REWARD
-            print(f"{loss}: {ret}")
+                print(f"Casting nan to {MIN_REWARD[self._loss_metric]}")
+                ret = MIN_REWARD[self._loss_metric]
+            print(f"{self._loss_metric}: {ret}")
             self.eval_cnt += 1
             return ret
         except OutOfDataRangeError:
-            return 0. # Change to MIN_REWARD?
+            return 0. # Change to MIN_REWARD[self._loss_metric]?
 
     def _valid_action_types(self) -> dict:
         valid_op_unary = self._builder.validate_op(UnaryOperator)

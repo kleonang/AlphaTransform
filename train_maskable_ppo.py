@@ -58,16 +58,16 @@ class CustomCallback(BaseCallback):
 
 def main(
     seed: int = 0,
-    instruments: str = "nasdaq",
-    steps: int = 200_000
+    loss_metric: str = "Sharpe",
+    steps: int = 100_000,
 ):
     warnings.filterwarnings('ignore')
     reseed_everything(seed)
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    env = AlphaEnv(device=device, print_expr=True)
+    env = AlphaEnv(device=device, print_expr=True, loss_metric=loss_metric)
 
-    name_prefix = f"new_{instruments}_{seed}"
+    name_prefix = f"new_{loss_metric}_{seed}"
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
 
     checkpoint_callback = CustomCallback(
@@ -119,7 +119,7 @@ def main(
 
 def fire_helper(
     seed: Union[int, Tuple[int]],
-    instruments: str,
+    loss_metric: str = "Sharpe", 
     steps: int = None
 ):
     if isinstance(seed, int):
@@ -133,7 +133,7 @@ def fire_helper(
     }
     for _seed in seed:
         main(_seed,
-             instruments,
+             loss_metric,
              default_steps[1] if steps is None else int(steps)
              )
 
