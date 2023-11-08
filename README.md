@@ -8,6 +8,38 @@ This repository contains a formulaic alpha generator using Reinforcement Learnin
 Here is a high-level overview of AlphaTransform's architecture:
 <img width="737" alt="AlphaTransform Architecture" src="https://github.com/kleonang/alphatransform/assets/35778042/fc5b32d0-b3c7-42de-bbbd-7bcb6e639c68">
 
+## Usage
+### Config
+The default parameters in `config.py` works on the input data provided in the `data` directory, but feel free to change the parameters if necessary (e.g. if using your own dataset or additional operators). 
+The training of the RL agent will depend on these specified parameters. 
+
+### Training
+To train a model on the provided data in the `data` directory, run:
+```bash
+python3 train_maskable_ppo.py <seed> <loss_metric> <num_steps>
+```
+where `<seed>` is any integer serving as a random seed for reproducible output, and `<loss_metric>` is a choice of `IC`, `RIC`, or `Sharpe`.
+`<num_steps>` refers to the number of steps that the RL training loop will run for, and is an optional parameter (with a default of 100,000). 
+
+An example training command is:
+```bash
+python3 train_maskable_ppo.py 42 Sharpe
+```
+
+### Testing
+To test a previously trained model, run:
+```bash
+python3 test_maskable_ppo.py <checkpoint_path> <num_distinct_alphas_to_generate> 
+```
+where `<checkpoint_path>` is the file path of the saved model checkpoint.
+`<num_distinct_alphas_to_generate>` is the number of distinct alphas (with unique loss values) to generate in the batch, 
+and is an optional parameter (with a default of 100). 
+
+An example test command is:
+```bash
+python3 test_maskable_ppo.py ./checkpoints/new_Sharpe_42_20231105171143/100352_steps.zip
+```
+
 ## References
 The data provided in the `data` directory was computed from the Google Finance dataset provided by:
 ```
