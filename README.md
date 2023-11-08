@@ -6,7 +6,7 @@ This repository contains a formulaic alpha generator using Reinforcement Learnin
 
 ## Architecture
 Here is a high-level overview of AlphaTransform's architecture:
-<img width="737" alt="AlphaTransform Architecture" src="https://github.com/kleonang/alphatransform/assets/35778042/fc5b32d0-b3c7-42de-bbbd-7bcb6e639c68">
+<img width="902" alt="AlphaTransform Architecture" src="https://github.com/kleonang/AlphaTransform/assets/35778042/661be04c-b0da-4845-9535-840994444286">
 
 ## Usage
 ### Config
