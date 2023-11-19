@@ -1,4 +1,7 @@
 # AlphaTransform: A Quantitative Trading Strategy Generation and Backtesting Framework 
+<p align="center">
+  <img src="https://github.com/kleonang/AlphaTransform/assets/35778042/be3007b4-1b59-4a3c-b6ae-587575ddcfca" width="400" height="400">
+</p>
 
 AlphaTransform is a Reinforcement Learning-based Alpha Generation and Alpha Backtesting system. 
 
